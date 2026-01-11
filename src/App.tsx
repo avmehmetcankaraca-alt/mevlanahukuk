@@ -10,7 +10,7 @@ import { Page, GeneratedDocument } from './types';
 // =================================================================
 // 1. ADIM: API ANAHTARINI AŞAĞIYA YAPIŞTIR (Tırnaklar kalsın!)
 // =================================================================
-const API_KEY = "AIzaSyCjaMUvejcuSiG6IFeb-dvVUR2R_QWLjSc";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 // =================================================================
 
 // --- YENİ DİLEKÇE MOTORU (App.tsx içine gömülü) ---
