@@ -1,20 +1,14 @@
 // @ts-nocheck
 /* eslint-disable */
-import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import History from './pages/History';
-import Research from './pages/Research';
-import { Page, GeneratedDocument } from './types';
+import React, { useState } from 'react';
 
-// =================================================================
-// ŞİFRENİZ BURAYA GÖMÜLDÜ (Artık Vercel ayarına gerek yok)
-// =================================================================
+// ==========================================
+// API ANAHTARI (Sistemin Kalbi)
+// ==========================================
 const API_KEY = "AIzaSyCjaMUvejcuSiG6IFeb-dvVUR2R_QWLjSc";
-// =================================================================
+// ==========================================
 
-// --- YENİ DİLEKÇE MOTORU (Şifreyi Gören Motor) ---
-const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => void }) => {
+export default function App() {
   const [company, setCompany] = useState('Mevlana Petrol');
   const [docType, setDocType] = useState('İhtarname');
   const [prompt, setPrompt] = useState('');
@@ -52,20 +46,11 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
       const data = await response.json();
       
       if (data.error) {
-        setOutput("GOOGLE HATASI: " + data.error.message);
+        setOutput("HATA: " + data.error.message);
       } else if (data.candidates && data.candidates[0].content) {
-        const text = data.candidates[0].content.parts[0].text;
-        setOutput(text);
-        
-        onSave({
-          id: Date.now().toString(),
-          title: `${docType} - ${company}`,
-          date: new Date().toISOString(),
-          type: docType,
-          preview: text.substring(0, 100) + "..."
-        });
+        setOutput(data.candidates[0].content.parts[0].text);
       } else {
-        setOutput("Beklenmedik bir cevap alındı. Lütfen tekrar deneyin.");
+        setOutput("Beklenmedik bir cevap alındı.");
       }
     } catch (error) {
       setOutput("BAĞLANTI HATASI: " + error);
@@ -75,87 +60,82 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-140px)] animate-fade-in">
-      <div className="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5 overflow-y-auto">
-        <h3 className="font-bold text-slate-800 border-b pb-2">Belge Detayları</h3>
-        <div>
-          <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Şirket</label>
-          <select className="w-full p-3 border rounded-xl" value={company} onChange={(e) => setCompany(e.target.value)}>
-            <option>Mevlana Petrol</option>
-            <option>Demirkaya İnşaat</option>
-            <option>Demre Otelcilik</option>
-            <option>Şahıs (Ali Yılmaz)</option>
-          </select>
+    <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex">
+      {/* SOL MENÜ */}
+      <div className="w-64 bg-[#0f172a] text-white p-6 flex flex-col gap-6">
+        <div className="text-center border-b border-slate-700 pb-4">
+          <h1 className="text-xl font-bold">MEVLANA GRUP</h1>
+          <p className="text-xs text-emerald-400">HUKUK OTOMASYONU v7.0</p>
         </div>
-        <div>
-          <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Tür</label>
-          <select className="w-full p-3 border rounded-xl" value={docType} onChange={(e) => setDocType(e.target.value)}>
-            <option>İhtarname</option>
-            <option>Savunma Dilekçesi</option>
-            <option>İcra Takibi</option>
-            <option>Tutanak</option>
-          </select>
+        <div className="p-3 bg-blue-600 rounded-lg text-center font-bold cursor-pointer">
+          📝 Dilekçe Hazırla
         </div>
-        <div className="flex-1">
-          <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Olay / Talimat</label>
-          <textarea 
-            className="w-full h-40 p-4 border rounded-xl text-sm" 
-            placeholder="Örn: Kiracı kirayı ödemiyor..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-          ></textarea>
+        <div className="mt-auto text-xs text-slate-500 text-center">
+          Av. Mevlana Demir
         </div>
-        <button onClick={handleGenerate} disabled={loading} className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition">
-          {loading ? 'Yazılıyor...' : '✨ Belgeyi Oluştur'}
-        </button>
       </div>
 
-      <div className="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-        <div className="bg-slate-50 border-b p-4 text-xs font-bold text-slate-400">SONUÇ EKRANI</div>
-        <textarea className="flex-1 w-full p-8 font-serif text-lg leading-loose resize-none focus:outline-none" value={output} readOnly placeholder="Belge burada görünecek..."></textarea>
-      </div>
-    </div>
-  );
-};
+      {/* ANA EKRAN */}
+      <div className="flex-1 p-8 overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-6 text-slate-800">Akıllı Belge Oluşturucu</h2>
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* GİRDİ PANELİ */}
+          <div className="w-full lg:w-1/3 bg-white p-6 rounded-xl shadow-md border border-slate-200 space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Şirket</label>
+              <select className="w-full p-3 border rounded-lg bg-slate-50" value={company} onChange={(e) => setCompany(e.target.value)}>
+                <option>Mevlana Petrol</option>
+                <option>Demirkaya İnşaat</option>
+                <option>Demre Otelcilik</option>
+                <option>Şahıs (Ali Yılmaz)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Belge Türü</label>
+              <select className="w-full p-3 border rounded-lg bg-slate-50" value={docType} onChange={(e) => setDocType(e.target.value)}>
+                <option>İhtarname</option>
+                <option>Savunma Dilekçesi</option>
+                <option>İcra Takibi</option>
+                <option>Tutanak</option>
+                <option>Sözleşme</option>
+              </select>
+            </div>
 
-// --- ANA PROGRAM ---
-const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<Page>(Page.Dashboard);
-  const [history, setHistory] = useState<GeneratedDocument[]>(() => {
-    const saved = localStorage.getItem('doc_history');
-    return saved ? JSON.parse(saved) : [];
-  });
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Olay / Talimat</label>
+              <textarea 
+                className="w-full h-40 p-3 border rounded-lg bg-slate-50 text-sm"
+                placeholder="Örn: Kiracı 3 aydır ödeme yapmıyor, tahliye ihtarnamesi hazırla..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+              ></textarea>
+            </div>
 
-  useEffect(() => { localStorage.setItem('doc_history', JSON.stringify(history)); }, [history]);
-  const handleSaveDoc = (doc: GeneratedDocument) => { setHistory(prev => [doc, ...prev]); };
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case Page.Dashboard: return <Dashboard setPage={setCurrentPage} history={history} />;
-      // DİKKAT: BURASI ARTIK ESKİ "Generator" DEĞİL, YENİ "InternalGenerator" KULLANIYOR
-      case Page.Generator: return <InternalGenerator onSave={handleSaveDoc} />;
-      case Page.Research: return <Research />;
-      case Page.History: return <History history={history} />;
-      default: return <Dashboard setPage={setCurrentPage} history={history} />;
-    }
-  };
-
-  return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-900">
-      <Sidebar activePage={currentPage} setPage={setCurrentPage} />
-      <main className="flex-1 overflow-y-auto bg-[#f8fafc]">
-        <header className="bg-white/80 backdrop-blur-md border-b h-20 flex items-center justify-between px-10 sticky top-0 z-20">
-          <div>
-            <h2 className="text-xl font-black text-slate-800">Mevlana Grup Hukuk</h2>
-            <span className="text-xs text-emerald-500 font-bold">SİSTEM AKTİF (v7.0 Final)</span>
+            <button 
+              onClick={handleGenerate} 
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition"
+            >
+              {loading ? 'Yazılıyor...' : '✨ Belgeyi Oluştur'}
+            </button>
           </div>
-        </header>
-        <div className="p-10 max-w-7xl mx-auto">
-          {renderPage()}
+
+          {/* SONUÇ PANELİ */}
+          <div className="w-full lg:w-2/3 bg-white p-6 rounded-xl shadow-md border border-slate-200 min-h-[500px] flex flex-col">
+            <div className="text-xs font-bold text-slate-400 uppercase border-b pb-2 mb-4">SONUÇ EKRANI</div>
+            <textarea 
+              className="flex-1 w-full p-4 text-lg font-serif leading-relaxed focus:outline-none resize-none"
+              value={output}
+              readOnly
+              placeholder="Belge burada görünecek..."
+            ></textarea>
+          </div>
+
         </div>
-      </main>
+      </div>
     </div>
   );
-};
-
-export default App;
+}
