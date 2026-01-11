@@ -8,12 +8,12 @@ import Research from './pages/Research';
 import { Page, GeneratedDocument } from './types';
 
 // =================================================================
-// 1. ADIM: API ANAHTARINI AŞAĞIYA YAPIŞTIR (Tırnaklar kalsın!)
+// ŞİFRENİZ BURAYA GÖMÜLDÜ (Artık Vercel ayarına gerek yok)
 // =================================================================
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const API_KEY = "AIzaSyCjaMUvejcuSiG6IFeb-dvVUR2R_QWLjSc";
 // =================================================================
 
-// --- YENİ DİLEKÇE MOTORU (App.tsx içine gömülü) ---
+// --- YENİ DİLEKÇE MOTORU (Şifreyi Gören Motor) ---
 const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => void }) => {
   const [company, setCompany] = useState('Mevlana Petrol');
   const [docType, setDocType] = useState('İhtarname');
@@ -22,27 +22,20 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
-    // Şifre Kontrolü
-    if (!API_KEY || API_KEY.includes("BURAYA")) {
-      setOutput("HATA: Lütfen GitHub'a gidip src/App.tsx dosyasının içine API anahtarınızı yapıştırın.");
-      return;
-    }
     if (!prompt) {
       alert("Lütfen bir talimat yazın.");
       return;
     }
 
     setLoading(true);
-    setOutput("Yapay zeka hukuk sistemine bağlanılıyor...\nBelge hazırlanıyor, lütfen bekleyin...");
+    setOutput("Yapay zeka hukuk sistemine bağlanılıyor... Lütfen bekleyin...");
 
-    // Yapay Zeka Talimatı
     const systemPrompt = `
       ROL: Sen Mevlana Grup Hukuk Müşavirliği'nin kıdemli yapay zeka asistanısın.
       MÜVEKKİL: ${company}
       BELGE TÜRÜ: ${docType}
       KONU: ${prompt}
       GÖREV: Yukarıdaki bilgilere göre, Türk Hukuku'na tam uyumlu, resmi ve profesyonel bir hukuki belge yaz. 
-      Eksik yerleri [TARİH], [ADRES] şeklinde bırak.
       Sadece belge metnini ver, sohbet etme.
     `;
 
@@ -64,7 +57,6 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
         const text = data.candidates[0].content.parts[0].text;
         setOutput(text);
         
-        // Arşive Kaydet
         onSave({
           id: Date.now().toString(),
           title: `${docType} - ${company}`,
@@ -73,7 +65,7 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
           preview: text.substring(0, 100) + "..."
         });
       } else {
-        setOutput("Beklenmedik bir cevap alındı. Tekrar deneyin.");
+        setOutput("Beklenmedik bir cevap alındı. Lütfen tekrar deneyin.");
       }
     } catch (error) {
       setOutput("BAĞLANTI HATASI: " + error);
@@ -84,7 +76,6 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-140px)] animate-fade-in">
-      {/* SOL PANEL */}
       <div className="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5 overflow-y-auto">
         <h3 className="font-bold text-slate-800 border-b pb-2">Belge Detayları</h3>
         <div>
@@ -102,7 +93,6 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
             <option>İhtarname</option>
             <option>Savunma Dilekçesi</option>
             <option>İcra Takibi</option>
-            <option>Sözleşme Feshi</option>
             <option>Tutanak</option>
           </select>
         </div>
@@ -110,19 +100,18 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
           <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Olay / Talimat</label>
           <textarea 
             className="w-full h-40 p-4 border rounded-xl text-sm" 
-            placeholder="Örn: Kiracı Ahmet Yılmaz kirayı ödemiyor..."
+            placeholder="Örn: Kiracı kirayı ödemiyor..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
           ></textarea>
         </div>
         <button onClick={handleGenerate} disabled={loading} className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition">
-          {loading ? 'Yazılıyor...' : '✨ Taslak Hazırla'}
+          {loading ? 'Yazılıyor...' : '✨ Belgeyi Oluştur'}
         </button>
       </div>
 
-      {/* SAĞ PANEL */}
       <div className="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-        <div className="bg-slate-50 border-b p-4 text-xs font-bold text-slate-400">ÖNİZLEME</div>
+        <div className="bg-slate-50 border-b p-4 text-xs font-bold text-slate-400">SONUÇ EKRANI</div>
         <textarea className="flex-1 w-full p-8 font-serif text-lg leading-loose resize-none focus:outline-none" value={output} readOnly placeholder="Belge burada görünecek..."></textarea>
       </div>
     </div>
@@ -143,7 +132,7 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case Page.Dashboard: return <Dashboard setPage={setCurrentPage} history={history} />;
-      // BURADA ORİJİNAL GENERATOR YERİNE BİZİM YAZDIĞIMIZI KULLANIYORUZ
+      // DİKKAT: BURASI ARTIK ESKİ "Generator" DEĞİL, YENİ "InternalGenerator" KULLANIYOR
       case Page.Generator: return <InternalGenerator onSave={handleSaveDoc} />;
       case Page.Research: return <Research />;
       case Page.History: return <History history={history} />;
@@ -158,7 +147,7 @@ const App: React.FC = () => {
         <header className="bg-white/80 backdrop-blur-md border-b h-20 flex items-center justify-between px-10 sticky top-0 z-20">
           <div>
             <h2 className="text-xl font-black text-slate-800">Mevlana Grup Hukuk</h2>
-            <span className="text-xs text-emerald-500 font-bold">SİSTEM ONLİNE (v5.0)</span>
+            <span className="text-xs text-emerald-500 font-bold">SİSTEM AKTİF (v7.0 Final)</span>
           </div>
         </header>
         <div className="p-10 max-w-7xl mx-auto">
