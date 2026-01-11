@@ -13,7 +13,7 @@ import { Page, GeneratedDocument } from './types';
 const API_KEY = "AIzaSyCjaMUvejcuSiG6IFeb-dvVUR2R_QWLjSc";
 // =================================================================
 
-// --- YENİ DİLEKÇE MOTORU (Sağlam Beyin) ---
+// --- YENİ DİLEKÇE MOTORU (App.tsx içine gömülü) ---
 const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => void }) => {
   const [company, setCompany] = useState('Mevlana Petrol');
   const [docType, setDocType] = useState('İhtarname');
@@ -24,7 +24,7 @@ const InternalGenerator = ({ onSave }: { onSave: (doc: GeneratedDocument) => voi
   const handleGenerate = async () => {
     // Şifre Kontrolü
     if (!API_KEY || API_KEY.includes("BURAYA")) {
-      setOutput("HATA: Lütfen GitHub'a gidip App.tsx dosyasının içine API anahtarınızı yapıştırın.");
+      setOutput("HATA: Lütfen GitHub'a gidip src/App.tsx dosyasının içine API anahtarınızı yapıştırın.");
       return;
     }
     if (!prompt) {
@@ -140,6 +140,17 @@ const App: React.FC = () => {
   useEffect(() => { localStorage.setItem('doc_history', JSON.stringify(history)); }, [history]);
   const handleSaveDoc = (doc: GeneratedDocument) => { setHistory(prev => [doc, ...prev]); };
 
+  const renderPage = () => {
+    switch (currentPage) {
+      case Page.Dashboard: return <Dashboard setPage={setCurrentPage} history={history} />;
+      // BURADA ORİJİNAL GENERATOR YERİNE BİZİM YAZDIĞIMIZI KULLANIYORUZ
+      case Page.Generator: return <InternalGenerator onSave={handleSaveDoc} />;
+      case Page.Research: return <Research />;
+      case Page.History: return <History history={history} />;
+      default: return <Dashboard setPage={setCurrentPage} history={history} />;
+    }
+  };
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-900">
       <Sidebar activePage={currentPage} setPage={setCurrentPage} />
@@ -151,10 +162,7 @@ const App: React.FC = () => {
           </div>
         </header>
         <div className="p-10 max-w-7xl mx-auto">
-          {currentPage === Page.Dashboard && <Dashboard setPage={setCurrentPage} history={history} />}
-          {currentPage === Page.Generator && <InternalGenerator onSave={handleSaveDoc} />}
-          {currentPage === Page.Research && <Research />}
-          {currentPage === Page.History && <History history={history} />}
+          {renderPage()}
         </div>
       </main>
     </div>
